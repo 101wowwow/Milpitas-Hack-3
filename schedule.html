@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Schedule</title>
+  <link rel="stylesheet" href="schedule.css" />
+</head>
+<body>
+  <button class="back-button" onclick="window.location.href='mainpage.html';" title="Back to main">←</button>
+  <div class="app-shell schedule-shell">
+    <div class="top-bar top-bar-row">
+      <div>
+        <h1>Task Timeline</h1>
+        <p class="page-copy">Review your tasks with start/end time, task name, and category in the chart below.</p>
+      </div>
+      <div class="top-bar-actions">
+        <button id="add-task-button" class="primary-button">Add Task Later</button>
+      </div>
+    </div>
+
+    <div id="task-chart" class="task-chart">
+      <div class="chart-row chart-header">
+        <div class="chart-box chart-time">Time</div>
+        <div class="chart-box chart-task">Task</div>
+        <div class="chart-box chart-category">Category</div>
+      </div>
+      <div id="task-chart-list" class="task-chart-list"></div>
+      <p id="no-task-message" class="no-task-message">No tasks yet. Add one to see your schedule chart.</p>
+    </div>
+
+    <img src="john.png" alt="John" class="corner-avatar" />
+  </div>
+
+  <div id="task-modal" class="modal hidden" aria-hidden="true">
+    <div class="modal-content">
+      <button id="task-modal-close" class="close-button" aria-label="Close task form">×</button>
+      <h2>Add a task</h2>
+      <form id="task-form" class="schedule-form">
+        <div class="form-row">
+          <label for="task-time">Start - End time</label>
+          <input id="task-time" name="task-time" type="text" placeholder="9:00 AM - 10:00 AM" required />
+        </div>
+        <div class="form-row">
+          <label for="task-name">Task name</label>
+          <input id="task-name" name="task-name" type="text" placeholder="Write report" required />
+        </div>
+        <div class="form-row">
+          <label for="task-category">Category</label>
+          <input id="task-category" name="task-category" type="text" placeholder="Work / Study / Personal" required />
+        </div>
+        <div class="form-actions">
+          <button type="submit">Save Task</button>
+          <button type="button" id="task-modal-cancel" class="secondary-button">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="schedule.js"></script>
+</body>
+</html>

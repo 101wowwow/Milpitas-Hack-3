@@ -1,0 +1,16 @@
+{
+  "name": "milpitas-hack-3",
+  "version": "1.0.0",
+  "description": "Mental health is important!",
+  "license": "ISC",
+  "author": "Bella Lu, Evelyn Lu, Nina Yuan, David Hsieh",
+  "type": "commonjs",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "devDependencies": {
+    "electron": "^42.4.0"
+  }
+}

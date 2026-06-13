@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Stats</title>
+  <style>
+    body {
+      background: url('background.png') center/cover no-repeat;
+      position: relative;
+      font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      display: flex;
+      flex-direction: column;
+    }
+    .back-button {
+      position: fixed;
+      top: 16px;
+      left: 16px;
+      width: 44px;
+      height: 44px;
+      border: none;
+      background: #dc2626;
+      color: white;
+      border-radius: 999px;
+      cursor: pointer;
+      font-size: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 12px rgba(220, 38, 38, 0.25);
+      z-index: 100;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .back-button:hover {
+      background: #991b1b;
+      transform: scale(1.08);
+    }
+    .page-shell {
+      max-width: 1100px;
+      margin: 24px auto;
+      background: #ffffff;
+      border-radius: 12px;
+      box-shadow: 0 12px 24px rgba(0,0,0,0.08);
+      padding: 20px;
+    }
+    h1 {
+      margin-top: 0;
+      color: #1a202c;
+    }
+    p { line-height: 1.6; }
+    .close-link { display: inline-block; margin-top: 12px; padding: 8px 12px; background: #4f46e5; color: white; border-radius: 999px; text-decoration: none; border: none; cursor: pointer; transition: transform 0.2s ease, box-shadow 0.2s ease; }
+    .close-link:hover { transform: scale(1.08); }
+
+    /* Analysis meter and charts */
+    .analysis-row { display: flex; gap: 20px; align-items: center; margin-bottom: 18px; }
+    .meter-card { flex: 0 0 360px; background:#f8fafc; border-radius:10px; padding:16px; box-shadow: inset 0 1px 0 rgba(255,255,255,0.6); }
+    .meter-title { font-weight:600; margin-bottom:8px; }
+    .meter-value { font-size: 14px; margin-top:8px; }
+    .meter { width:100%; height:18px; appearance:none; -webkit-appearance:none; border-radius:9px; background:linear-gradient(90deg,#34d399 0%,#f97316 50%,#ef4444 100%); overflow:hidden; }
+    .meter > progress { width:100%; }
+
+    .charts { flex: 1; display:flex; gap:12px; }
+    .chart-card { flex:1; background:#fff; border-radius:10px; padding:12px; box-shadow:0 6px 18px rgba(10,20,30,0.04);} 
+    .chart-controls { display:flex; gap:8px; align-items:center; margin-bottom:8px; }
+    .small { font-size:13px; color:#555; }
+
+    @m
+  <button class="back-button" onclick="window.location.href='mainpage.html';" title="Back to main">←</button>edia (max-width: 900px) { .analysis-row { flex-direction:column; } .meter-card{width:100%} .charts{flex-direction:column;} }
+  </style>
+</head>
+<body>
+  <div class="page-shell">
+    <a href="mainpage.html" class="close-link">Back to Main</a>
+    <h1>Analysis</h1>
+
+    <div class="analysis-row">
+      <div class="meter-card">
+        <div class="meter-title">Burnout Risk</div>
+        <div id="burnout-meter-wrap">
+          <div style="display:flex;align-items:center;gap:12px;">
+            <div style="flex:1">
+              <div style="height:16px;background:#e6e6e9;border-radius:8px;overflow:hidden;">
+                <div id="burnout-fill" style="height:100%;width:0%;background:linear-gradient(90deg,#34d399,#f59e0b,#ef4444);transition:width 600ms;"></div>
+              </div>
+            </div>
+            <div id="burnout-text" style="width:62px;text-align:right;font-weight:600">0%</div>
+          </div>
+          <div class="meter-value small" id="burnout-reasons">Calculating…</div>
+        </div>
+        <div style="margin-top:10px;font-size:13px;color:#666">4-day stress sum: <span id="stress-4d">—</span></div>
+      </div>
+
+      <div class="charts">
+        <div class="chart-card">
+          <div class="chart-controls">
+            <label class="small">Date vs</label>
+            <select id="timeseries-metric">
+              <option value="stress">Stress</option>
+              <option value="happiness">Happiness</option>
+              <option value="workScreenTime">Work Screen Time</option>
+              <option value="casualScreenTime">Casual Screen Time</option>
+              <option value="taskCompletionRate">Task Completion Rate</option>
+            </select>
+            <button id="refresh-timeseries" class="small">Refresh</button>
+          </div>
+          <canvas id="timeseries-chart" height="200"></canvas>
+        </div>
+
+        <div class="chart-card">
+          <div class="chart-controls">
+            <label class="small">X-axis</label>
+            <select id="xy-x">
+              <option value="workScreenTime">Work Screen Time</option>
+              <option value="casualScreenTime">Casual Screen Time</option>
+            </select>
+            <label class="small">Y-axis</label>
+            <select id="xy-y">
+              <option value="stress">Stress</option>
+              <option value="happiness">Happiness</option>
+            </select>
+            <button id="refresh-xy" class="small">Refresh</button>
+          </div>
+          <canvas id="xy-chart" height="200"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <a href="javascript:window.close()" class="close-link">Close</a>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="js/stats.js"></script>
+
+</body>
+</html>
