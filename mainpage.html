@@ -7,20 +7,18 @@
   <link rel="stylesheet" href="mainpage.css" />
 </head>
 <body>
-    
+  <div class="header-logo">
+    <img src="logo.png" alt="Logo" />
+  </div>
   <div class="bottom-bar">
     <button id="bot-btn-1">Stats</button>
-    <button id="bot-btn-2">Schedule</button>
     <button id="bot-btn-3">Settings</button>
-    <button id="bot-btn-4">Questionnaire</button>
+    <button id="bot-btn-4">Questionaire</button>
   </div>
   <img src="mainJohn.png" alt="John" class="corner-avatar" />
   <script>
     document.getElementById('bot-btn-1').addEventListener('click', () => {
       window.location.href = 'stats.html';
-    });
-    document.getElementById('bot-btn-2').addEventListener('click', () => {
-      window.location.href = 'schedule.html';
     });
     document.getElementById('bot-btn-3').addEventListener('click', () => {
       window.location.href = 'settings.html';
@@ -28,6 +26,19 @@
     document.getElementById('bot-btn-4').addEventListener('click', () => {
       window.location.href = 'questionaire.html';
     });
+
+    const cornerAvatar = document.querySelector('.corner-avatar');
+    if (cornerAvatar) {
+      cornerAvatar.addEventListener('click', () => {
+        try {
+          const { ipcRenderer } = require('electron');
+          ipcRenderer.send('show-mascot-popup');
+        } catch (e) {
+          console.log('IPC not available');
+        }
+      });
+      cornerAvatar.style.cursor = 'pointer';
+    }
 
     const questionnaireNavButton = document.getElementById('bot-btn-4');
     const QUESTIONNAIRE_KEY = 'dailyQuestionnaireEntries';
@@ -44,14 +55,12 @@
 
     function updateQuestionnaireNav() {
       if (!questionnaireNavButton) return;
-      const completed = hasQuestionnaireForDate(getTodayDate());
-      questionnaireNavButton.disabled = completed;
-      questionnaireNavButton.textContent = completed ? 'Questionnaire Done' : 'Questionnaire';
-      questionnaireNavButton.style.opacity = completed ? '0.6' : '';
-      questionnaireNavButton.style.cursor = completed ? 'not-allowed' : '';
+      questionnaireNavButton.disabled = false;
+      questionnaireNavButton.textContent = 'Questionnaire';
+      questionnaireNavButton.style.opacity = '';
+      questionnaireNavButton.style.cursor = '';
     }
 
     updateQuestionnaireNav();
   </script>
 </body>
-</html>

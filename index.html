@@ -8,30 +8,38 @@
   <style>
     .back-button {
       position: absolute;
-      top: 1.5rem;
-      left: 1.5rem;
-      width: 44px;
-      height: 44px;
+      top: 0%;
+      left: 0rem;
+      width: 96px;
+      height: 96px;
       border: none;
-      background: #dc2626;
-      color: white;
-      border-radius: 10px;
+      background: transparent;
+      color: rgb(199, 255, 177);
+      border-radius: 0;
       cursor: pointer;
       font-size: 24px;
       display: flex;
       align-items: center;
       justify-content: center;
-      box-shadow: 0 4px 12px rgba(220, 38, 38, 0.25);
+      box-shadow: none;
       z-index: 10;
+      padding: 0;
     }
     .back-button:hover {
-      background: #991b1b;
+      background: transparent;
+    }
+    .back-button img {
+      width: 96px;
+      height: 96px;
+      display: block;
     }
   </style>
 </head>
 <body>
   
-  <button class="back-button" onclick="window.location.href='mainpage.html';" title="Back to main">←</button>
+  <button class="back-button" onclick="window.location.href='mainpage.html';" title="Back to main">
+    <img src="arrow.png" alt="Back" style="width:96px;height:96px;display:block;" />
+  </button>
   <div class="app-shell">
     <div class="top-bar">
       <div>
@@ -93,6 +101,11 @@
           <option>9:00 PM</option>
           <option>10:00 PM</option>
         </select>
+      </div>
+
+      <div class="form-row">
+        <label for="duration">Duration (minutes)</label>
+        <input id="duration" name="duration" type="number" min="1" placeholder="e.g. 60" required />
       </div>
 
       <div class="form-row">

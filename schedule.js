@@ -12,8 +12,10 @@ const questionnaireModal = document.getElementById('questionnaire-modal');
 const questionnaireForm = document.getElementById('questionnaire-form');
 const closeQuestionnaire = document.getElementById('close-questionnaire');
 const skipQuestionnaireButton = document.getElementById('skip-questionnaire');
+const exitButton = document.querySelector('.back-button');
 const questionnaireStatus = document.getElementById('questionnaire-status');
 const questionnaireHistory = document.getElementById('questionnaire-history');
+const stressSuggestion = document.getElementById('stress-suggestion');
 const taskChartList = document.getElementById('task-chart-list');
 const addTaskButton = document.getElementById('add-task-button');
 const taskModal = document.getElementById('task-modal');
@@ -32,7 +34,26 @@ function getTodayDate() {
 
 function loadEntries() {
   const stored = localStorage.getItem(STORAGE_KEY);
-  return stored ? JSON.parse(stored) : [];
+  const raw = stored ? JSON.parse(stored) : [];
+  // Normalize older entries that used `time` (start - end) into `durationMinutes`.
+  return raw.map(entry => {
+    const e = Object.assign({}, entry);
+    if (typeof e.durationMinutes === 'undefined') {
+      if (e.time && e.time.includes('-')) {
+        const mins = parseTimeRangeToMinutes(e.time);
+        if (typeof mins === 'number' && mins > 0) e.durationMinutes = mins;
+        else e.durationMinutes = null;
+      } else if (e.time && !isNaN(parseInt(e.time, 10))) {
+        // if time stored as a number of minutes
+        e.durationMinutes = parseInt(e.time, 10);
+      } else {
+        e.durationMinutes = null;
+      }
+    }
+    // ensure done flag exists
+    if (typeof e.done === 'undefined') e.done = false;
+    return e;
+  });
 }
 
 function saveEntries(entries) {
@@ -57,6 +78,47 @@ function getLastQuestionnaire() {
   return items.length ? items[items.length - 1] : null;
 }
 
+function getStressSuggestionText(stressLevel) {
+  if (typeof stressLevel !== 'number' || Number.isNaN(stressLevel)) {
+    return null;
+  }
+
+  const stressPercent = stressLevel * 10;
+
+  if (stressPercent >= 90) {
+    return 'Stress is very high right now. It may help to talk with a trusted person or close friend about how you are feeling.';
+  }
+
+  if (stressPercent >= 70) {
+    return 'Stress is high. Try writing a short journal entry or taking a walk to help calm your mind.';
+  }
+
+  if (stressPercent > 40) {
+    return 'Your stress is above 40%. Take three deep breaths slowly and focus on steady inhales and exhales.';
+  }
+
+  return null;
+}
+
+function renderStressSuggestion(stressLevel) {
+  if (!stressSuggestion) return;
+  const message = getStressSuggestionText(stressLevel);
+
+  if (!message) {
+    stressSuggestion.classList.add('hidden');
+    stressSuggestion.textContent = '';
+    return;
+  }
+
+  stressSuggestion.textContent = message;
+  stressSuggestion.classList.remove('hidden');
+}
+
+function renderLatestStressSuggestion() {
+  const lastEntry = getLastQuestionnaire();
+  renderStressSuggestion(lastEntry ? lastEntry.stress : null);
+}
+
 function analyzePatterns(entries) {
   if (entries.length === 0) {
     return 'No entries yet.';
@@ -67,7 +129,7 @@ function analyzePatterns(entries) {
   const purposeCounts = { Work: 0, Fun: 0, Mixed: 0 };
 
   entries.forEach(entry => {
-    timeCounts[entry.time] = (timeCounts[entry.time] || 0) + 1;
+    timeCounts[formatDuration(entry.durationMinutes)] = (timeCounts[formatDuration(entry.durationMinutes)] || 0) + 1;
     activityCounts[entry.activity] = (activityCounts[entry.activity] || 0) + 1;
     purposeCounts[entry.purpose] = (purposeCounts[entry.purpose] || 0) + 1;
   });
@@ -106,7 +168,7 @@ function renderEntries() {
     card.className = 'entry-card';
     card.innerHTML = `
       <div class="entry-header">
-        <span>${entry.day} · ${entry.time}</span>
+        <span>${entry.day} · ${formatDuration(entry.durationMinutes)}</span>
         <span class="purpose-label">${entry.purpose || 'Unknown'}</span>
       </div>
       <div class="entry-detail"><strong>Activity:</strong> ${entry.activity || 'Task'}</div>
@@ -137,6 +199,9 @@ function renderQuestionnaireHistory() {
       </div>
       <div class="entry-detail"><strong>Stress:</strong> ${entry.stress || 'Unknown'}</div>
       <div class="entry-detail"><strong>Sleep:</strong> ${entry.sleepQuality || 'Unknown'}</div>
+      <div class="entry-detail"><strong>Confidence:</strong> ${entry.confidence || 'Unknown'}</div>
+      <div class="entry-detail"><strong>Total tracked minutes today:</strong> ${formatDuration(entry.totalDurationMinutes)}</div>
+      <div class="entry-detail"><strong>Sleep minutes today:</strong> ${formatDuration(entry.totalSleepMinutes)}</div>
       <div class="entry-detail"><strong>Notes:</strong> ${entry.notes || 'No notes'}</div>
     `;
     questionnaireHistory.appendChild(card);
@@ -205,16 +270,105 @@ function renderTaskChart() {
 
   if (noTaskMessage) noTaskMessage.style.display = 'none';
 
-  entries.slice().reverse().forEach(entry => {
+  // show only today's entries in the chart
+  const today = getTodayDate();
+  const todays = entries.filter(e => e.day === today);
+  if (!todays.length) {
+    if (noTaskMessage) noTaskMessage.style.display = 'block';
+    return;
+  }
+  if (noTaskMessage) noTaskMessage.style.display = 'none';
+
+  todays.slice().reverse().forEach(entry => {
     const row = document.createElement('div');
     row.className = 'chart-row';
+    if (entry.done) row.classList.add('completed');
     row.innerHTML = `
-      <div class="chart-box chart-time">${entry.time || '—'}</div>
+      <div class="chart-box chart-time"><label><input type="checkbox" class="task-checkbox" data-id="${entry.createdAt}" ${entry.done ? 'checked' : ''}> <span class="time-text">${formatDuration(entry.durationMinutes)}</span></label></div>
       <div class="chart-box chart-task">${entry.activity || 'Untitled task'}</div>
       <div class="chart-box chart-category">${entry.purpose || 'Category'}</div>
     `;
     taskChartList.appendChild(row);
   });
+}
+
+// Event delegation for checkbox toggles
+if (taskChartList) {
+  taskChartList.addEventListener('change', event => {
+    const target = event.target;
+    if (!target || !target.classList.contains('task-checkbox')) return;
+    const id = target.getAttribute('data-id');
+    const entries = loadEntries();
+    const idx = entries.findIndex(e => e.createdAt === id);
+    if (idx === -1) return;
+    entries[idx].done = !!target.checked;
+    saveEntries(entries);
+    // toggle visual
+    const row = target.closest('.chart-row');
+    if (row) row.classList.toggle('completed', entries[idx].done);
+  });
+}
+
+function formatDuration(minutes) {
+  if (minutes == null) return '—';
+  const mins = Number(minutes);
+  if (isNaN(mins)) return '—';
+  if (mins >= 60) {
+    const h = Math.floor(mins / 60);
+    const m = mins % 60;
+    return m === 0 ? `${h}h` : `${h}h ${m}m`;
+  }
+  return `${mins}m`;
+}
+
+function parseTimeRangeToMinutes(range) {
+  // expected formats like "9:00 AM - 10:30 AM" or "09:00-10:00"
+  try {
+    const parts = range.split('-').map(s => s.trim());
+    if (parts.length !== 2) return null;
+    const start = parseTimeToMinutes(parts[0]);
+    const end = parseTimeToMinutes(parts[1]);
+    if (start == null || end == null) return null;
+    let diff = end - start;
+    if (diff < 0) diff += 24 * 60; // cross-midnight
+    return diff;
+  } catch (e) {
+    return null;
+  }
+}
+
+function parseTimeToMinutes(t) {
+  // normalize and parse times like "9:30 AM", "21:00", "9:30"
+  const m = t.match(/^(\d{1,2})(?::(\d{2}))?\s*(AM|PM)?$/i);
+  if (!m) return null;
+  let hh = parseInt(m[1], 10);
+  const mm = m[2] ? parseInt(m[2], 10) : 0;
+  const ampm = m[3] ? m[3].toUpperCase() : null;
+  if (ampm) {
+    if (ampm === 'PM' && hh !== 12) hh += 12;
+    if (ampm === 'AM' && hh === 12) hh = 0;
+  }
+  if (hh >= 0 && hh < 24 && mm >= 0 && mm < 60) return hh * 60 + mm;
+  return null;
+}
+
+function scheduleMidnightRefresh() {
+  try {
+    const now = new Date();
+    const next = new Date(now);
+    next.setDate(now.getDate() + 1);
+    next.setHours(0, 0, 0, 0);
+    const ms = next.getTime() - now.getTime();
+    setTimeout(() => {
+      renderTaskChart();
+      renderEntries();
+      updateQuestionnaireStatus();
+      // schedule the next refresh
+      scheduleMidnightRefresh();
+    }, ms + 50);
+  } catch (e) {
+    // ignore scheduling errors
+  }
 }
 
 function renderSchedulePage() {
@@ -238,11 +392,14 @@ if (form) {
     const formData = new FormData(form);
     const newEntry = {
       day: formData.get('day'),
+      // preserve legacy time select for reference but also store duration
       time: formData.get('time'),
+      durationMinutes: parseInt(formData.get('duration'), 10) || null,
       activity: formData.get('activity'),
       purpose: formData.get('purpose'),
       notes: formData.get('notes').trim(),
       createdAt: new Date().toISOString(),
+      done: false,
     };
 
     const entries = loadEntries();
@@ -259,11 +416,23 @@ if (questionnaireForm) {
     event.preventDefault();
 
     const formData = new FormData(questionnaireForm);
+    const today = getTodayDate();
+    const entries = loadEntries();
+    const todaysEntries = entries.filter(e => e.day === today);
+    const totalDurationMinutes = todaysEntries.reduce((sum, e) => sum + (Number(e.durationMinutes) || 0), 0);
+    const totalSleepMinutes = todaysEntries
+      .filter(e => (e.activity || '').toLowerCase().includes('sleep'))
+      .reduce((sum, e) => sum + (Number(e.durationMinutes) || 0), 0);
+
+    // store numeric values for easy plotting and include today's durations
     const questionnaireEntry = {
-      date: getTodayDate(),
-      mood: formData.get('mood'),
-      stress: formData.get('stress'),
-      sleepQuality: formData.get('sleepQuality'),
+      date: today,
+      mood: parseInt(formData.get('mood'), 10) || null,
+      stress: parseInt(formData.get('stress'), 10) || null,
+      sleepQuality: parseInt(formData.get('sleepQuality'), 10) || null,
+      confidence: parseInt(formData.get('confidence'), 10) || null,
+      totalDurationMinutes,
+      totalSleepMinutes,
       notes: formData.get('questionNotes').trim(),
       createdAt: new Date().toISOString(),
     };
@@ -275,6 +444,7 @@ if (questionnaireForm) {
     hideQuestionnaireModal();
     updateQuestionnaireStatus();
     renderQuestionnaireHistory();
+    renderStressSuggestion(questionnaireEntry.stress);
   });
 }
 
@@ -289,7 +459,7 @@ if (taskForm) {
     const formData = new FormData(taskForm);
     const newEntry = {
       day: getTodayDate(),
-      time: formData.get('task-time'),
+      durationMinutes: parseInt(formData.get('task-duration'), 10) || null,
       activity: formData.get('task-name'),
       purpose: formData.get('task-category'),
       notes: '',
@@ -356,6 +526,12 @@ if (skipQuestionnaireButton) {
   skipQuestionnaireButton.addEventListener('click', hideQuestionnaireModal);
 }
 
+if (exitButton) {
+  exitButton.addEventListener('click', () => {
+    window.location.href = 'mainpage.html';
+  });
+}
+
 if (clearStorageButton) {
   clearStorageButton.addEventListener('click', () => {
     if (!confirm('Clear all saved schedule entries?')) {
@@ -380,6 +556,9 @@ renderEntries();
 renderSchedulePage();
 renderQuestionnaireHistory();
 updateQuestionnaireStatus();
+renderLatestStressSuggestion();
+// schedule automatic refresh at midnight each day
+scheduleMidnightRefresh();
 promptQuestionnaireIfNeeded();
 
 // Back-to-top behavior for the scrollable .app-shell

@@ -36,8 +36,8 @@ body {
 
 .app-shell {
   position: relative;
-  width: 480px;
-  height: 480px;
+  width: min(480px, 100%);
+  max-height: calc(100vh - 2rem);
   margin: auto;
   padding: 1.5rem;
   background: var(--surface);
@@ -65,8 +65,28 @@ body {
   width: 120px;
   max-width: 25%;
   border-radius: 18px;
-  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.18);
+  box-shadow: none;
   cursor: pointer;
+}
+
+.stress-suggestion {
+  position: absolute;
+  right: 1rem;
+  bottom: 8.5rem;
+  width: min(220px, 90vw);
+  padding: 1rem;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.96);
+  border: 1px solid rgba(37, 99, 235, 0.16);
+  box-shadow: 0 16px 32px rgba(15, 23, 42, 0.12);
+  color: var(--text);
+  font-size: 0.95rem;
+  line-height: 1.55;
+  z-index: 5;
+}
+
+.stress-suggestion.hidden {
+  display: none;
 }
 
 .avatar-questionnaire-button {
@@ -113,21 +133,50 @@ p {
 .textarea-row {
   display: grid;
   gap: 0.65rem;
+  cursor: pointer;
+  padding: 0.9rem 1rem;
+  border-radius: 24px;
+  background: rgba(248, 250, 255, 0.95);
+  transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.form-row:hover,
+.textarea-row:hover {
+  background: #eef4ff;
 }
 
 label {
   font-weight: 600;
+  cursor: pointer;
 }
 
 select,
 textarea,
-input[type="text"] {
+input[type="text"],
+input[type="number"] {
   width: 100%;
-  padding: 0.95rem 1rem;
+  padding: 1.25rem 1.25rem;
   border: 1px solid var(--border);
   border-radius: 14px;
   font: inherit;
   background: #fff;
+  font-size: 1.05rem;
+}
+
+select {
+  -webkit-appearance: none;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M0 0l5 6 5-6' fill='none' stroke='%236b7280' stroke-width='1.5'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 1.25rem center;
+  background-size: 10px 6px;
+  padding-right: 2.5rem;
+}
+
+textarea,
+input[type="text"],
+input[type="number"] {
+  cursor: text;
 }
 
 button {
@@ -141,7 +190,8 @@ button {
 
 select:focus,
 textarea:focus,
-input[type="text"]:focus {
+input[type="text"]:focus,
+input[type="number"]:focus {
   outline: 2px solid rgba(37, 99, 235, 0.25);
   border-color: rgba(37, 99, 235, 0.3);
 }
@@ -242,27 +292,34 @@ button[type="submit"] {
 
 .back-button {
   position: fixed;
-  top: 16px;
-  left: 16px;
-  width: 44px;
-  height: 44px;
+  top: -10px;
+  left: -10px;
+  width: 96px;
+  height: 96px;
   border: none;
-  background: #dc2626;
+  background: transparent;
   color: white;
-  border-radius: 999px;
+  border-radius: 0;
   cursor: pointer;
   font-size: 24px;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.25);
+  box-shadow: none;
   z-index: 100;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition: transform 0.2s ease;
+  padding: 0;
 }
 
 .back-button:hover {
-  background: #991b1b;
-  transform: scale(1.08);
+  background: transparent;
+  transform: scale(1.02);
+}
+
+.back-button img {
+  width: 96px;
+  height: 96px;
+  display: block;
 }
 
 .top-bar {
@@ -407,6 +464,20 @@ button[type="submit"] {
   gap: 0.75rem;
 }
 
+/* checkbox inside chart-time cell */
+.chart-box input.task-checkbox {
+  width: 18px;
+  height: 18px;
+  transform: translateY(0);
+}
+
+/* completed task style */
+.chart-row.completed .chart-task,
+.chart-row.completed .chart-category {
+  text-decoration: line-through;
+  opacity: 0.6;
+}
+
 .no-task-message {
   margin: 0;
   color: var(--muted);
@@ -422,6 +493,7 @@ button[type="submit"] {
   padding: 1rem;
   background: rgba(15, 23, 42, 0.45);
   z-index: 50;
+  overflow-y: auto;
 }
 
 .modal.hidden {
@@ -430,6 +502,8 @@ button[type="submit"] {
 
 .modal-content {
   width: min(480px, 100%);
+  max-height: calc(100vh - 2rem);
+  overflow-y: auto;
   border-radius: 24px;
   padding: 1.5rem;
   background: var(--surface);
@@ -467,20 +541,24 @@ button[type="submit"] {
 .modal {
   position: fixed;
   inset: 0;
-  display: grid;
-  place-items: center;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
   background: rgba(15, 23, 42, 0.45);
   padding: 1.25rem;
   z-index: 50;
+  overflow-y: auto;
 }
 
 .modal-content {
   width: min(100%, 520px);
+  max-height: calc(100vh - 2.5rem);
   background: var(--surface);
   padding: 1.5rem;
   border-radius: 24px;
   box-shadow: 0 30px 60px rgba(15, 23, 42, 0.18);
   position: relative;
+  overflow-y: auto;
 }
 
 .close-button {

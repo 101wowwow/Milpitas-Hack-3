@@ -7,7 +7,9 @@
   <link rel="stylesheet" href="schedule.css" />
 </head>
 <body>
-  <button class="back-button" onclick="window.location.href='mainpage.html';" title="Back to main">←</button>
+  <button class="back-button" onclick="window.location.href='mainpage.html';" title="Back to main">
+    <img src="arrow.png" alt="Back" style="width:96px;height:96px;display:block;" />
+  </button>
   <style> 
     html, body { height: 100%; margin: 0; }
     body{
@@ -18,12 +20,11 @@
     <div class="top-bar">
       <div>
         <h1>Schedule Tracker</h1>
-        <p class="intro-text">Home screen shows your schedule and recent patterns. Complete the daily check-in each morning to help the system identify crisis signals.</p>
+        <p class="intro-text">What's up it's me, John Mintal. I'm here to make sure that you are doing alright :D Because I am not an actual living human, I need you to fill out this form for me pretty please :O</p>
       </div>
       <div class="top-bar-actions">
         <button id="open-questionnaire" class="primary-button">Daily Morning Check-in</button>
         <button id="open-schedule" class="secondary-button">Open Schedule</button>
-        <button id="open-new-page" class="secondary-button">Open New Page</button>
       </div>
     </div>
 
@@ -124,14 +125,14 @@
       <div id="questionnaire-history" class="entries-list"></div>
     </section>
 
+    <div id="stress-suggestion" class="stress-suggestion hidden" aria-live="polite"></div>
     <img src="john.png" alt="John" class="corner-avatar" />
   </div>
 
   <div id="questionnaire-modal" class="modal hidden" aria-hidden="true">
     <div class="modal-content">
-      <button id="close-questionnaire" class="close-button" aria-label="Close check-in">×</button>
       <h2>Daily Morning Check-in</h2>
-      <p>Answer these quick questions to help identify trends and when a crisis may be approaching.</p>
+      <p>Answer these quick questions!!!</p>
       <form id="questionnaire-form" class="schedule-form">
         <div class="form-row">
           <label for="mood">Mood right now</label>
@@ -171,6 +172,23 @@
           <label for="sleepQuality">Sleep quality</label>
           <select id="sleepQuality" name="sleepQuality" required>
             <option value="">Choose quality</option>
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+            <option value="6">6</option>
+            <option value="7">7</option>
+            <option value="8">8</option>
+            <option value="9">9</option>
+            <option value="10">10</option>
+          </select>
+        </div>
+
+        <div class="form-row">
+          <label for="confidence">Confidence that you will successfully complete all tasks</label>
+          <select id="confidence" name="confidence" required>
+            <option value="">Choose confidence</option>
             <option value="1">1</option>
             <option value="2">2</option>
             <option value="3">3</option>

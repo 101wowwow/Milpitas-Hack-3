@@ -7,7 +7,9 @@
   <link rel="stylesheet" href="schedule.css" />
 </head>
 <body>
-  <button class="back-button" onclick="window.location.href='mainpage.html';" title="Back to main">←</button>
+  <button class="back-button" onclick="window.location.href='mainpage.html';" title="Back to main">
+    <img src="arrow.png" alt="Back" style="width:96px;height:98px;display:block;" />
+  </button>
   <div class="app-shell schedule-shell">
     <div class="top-bar top-bar-row">
       <div>
@@ -29,7 +31,7 @@
       <p id="no-task-message" class="no-task-message">No tasks yet. Add one to see your schedule chart.</p>
     </div>
 
-    <img src="john.png" alt="John" class="corner-avatar" />
+
   </div>
 
   <div id="task-modal" class="modal hidden" aria-hidden="true">
@@ -38,8 +40,8 @@
       <h2>Add a task</h2>
       <form id="task-form" class="schedule-form">
         <div class="form-row">
-          <label for="task-time">Start - End time</label>
-          <input id="task-time" name="task-time" type="text" placeholder="9:00 AM - 10:00 AM" required />
+          <label for="task-duration">Duration (minutes)</label>
+          <input id="task-duration" name="task-duration" type="number" min="1" placeholder="e.g. 45" required />
         </div>
         <div class="form-row">
           <label for="task-name">Task name</label>

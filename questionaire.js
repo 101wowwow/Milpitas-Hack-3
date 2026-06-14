@@ -6,13 +6,36 @@ const questionnaireButton = document.getElementById('open-questionnaire');
 const openScheduleButton = document.getElementById('open-schedule');
 const closeScheduleButton = document.getElementById('close-schedule');
 const scheduleSection = document.getElementById('schedule-section');
-const openNewPageButton = document.getElementById('open-new-page');
 const questionnaireModal = document.getElementById('questionnaire-modal');
 const questionnaireForm = document.getElementById('questionnaire-form');
-const closeQuestionnaire = document.getElementById('close-questionnaire');
 const skipQuestionnaireButton = document.getElementById('skip-questionnaire');
+const exitButton = document.querySelector('.back-button');
 const questionnaireStatus = document.getElementById('questionnaire-status');
 const questionnaireHistory = document.getElementById('questionnaire-history');
+const stressSuggestion = document.getElementById('stress-suggestion');
+
+// Make entire form-row clickable
+function enableFormRowClickability() {
+  const questionnaireForm = document.getElementById('questionnaire-form');
+  if (questionnaireForm) {
+    const formRows = questionnaireForm.querySelectorAll('.form-row, .textarea-row');
+    formRows.forEach(row => {
+      // Only add listener if not already added
+      if (!row.dataset.clickListenerAdded) {
+        row.addEventListener('click', (e) => {
+          const input = row.querySelector('select, textarea, input');
+          if (input && e.target !== input) {
+            input.focus();
+            if (input.tagName === 'SELECT') {
+              input.click();
+            }
+          }
+        });
+        row.dataset.clickListenerAdded = 'true';
+      }
+    });
+  }
+}
 
 const STORAGE_KEY = 'schedulePatternEntries';
 const QUESTIONNAIRE_KEY = 'dailyQuestionnaireEntries';
@@ -46,6 +69,46 @@ function hasQuestionnaireForDate(date) {
 function getLastQuestionnaire() {
   const items = loadQuestionnaires();
   return items.length ? items[items.length - 1] : null;
+}
+
+function getStressSuggestionText(stress) {
+  const value = Number(stress);
+  if (!Number.isFinite(value)) {
+    return null;
+  }
+
+  if (value >= 9) {
+    return 'Stress is very high right now. Try talking with a trusted person about how you are feeling.';
+  }
+
+  if (value >= 8) {
+    return 'Your stress is high. Consider writing a brief journal entry or taking a calming walk.';
+  }
+
+  if (value > 4) {
+    return 'Stress is above 40%. Take three deep breaths slowly, focusing on steady inhales and exhales.';
+  }
+
+  return null;
+}
+
+function renderStressSuggestion(stress) {
+  if (!stressSuggestion) return;
+  const message = getStressSuggestionText(stress);
+
+  if (!message) {
+    stressSuggestion.classList.add('hidden');
+    stressSuggestion.textContent = '';
+    return;
+  }
+
+  stressSuggestion.textContent = message;
+  stressSuggestion.classList.remove('hidden');
+}
+
+function renderLatestStressSuggestion() {
+  const last = getLastQuestionnaire();
+  renderStressSuggestion(last ? last.stress : null);
 }
 
 function analyzePatterns(entries) {
@@ -124,6 +187,7 @@ function renderQuestionnaireHistory() {
       </div>
       <div class="entry-detail"><strong>Stress:</strong> ${entry.stress}</div>
       <div class="entry-detail"><strong>Sleep:</strong> ${entry.sleepQuality}</div>
+      <div class="entry-detail"><strong>Confidence:</strong> ${entry.confidence}</div>
       <div class="entry-detail"><strong>Notes:</strong> ${entry.notes || 'No notes'}</div>
     `;
     questionnaireHistory.appendChild(card);
@@ -131,57 +195,44 @@ function renderQuestionnaireHistory() {
 }
 
 function updateQuestionnaireStatus() {
+  if (!questionnaireStatus) return;
   const today = getTodayDate();
-  const completed = hasQuestionnaireForDate(today);
   const lastEntry = getLastQuestionnaire();
   const now = new Date();
   const hour = now.getHours();
 
-  if (completed) {
-    questionnaireStatus.textContent = `Today's check-in is complete. Last completed on ${today}.`;
-    setQuestionnaireButtonState(true);
-    return;
-  }
-
   questionnaireStatus.textContent = hour >= 6 && hour < 12
-    ? 'You have a pending morning check-in. Please complete it.'
-    : 'Morning check-in is still available. Tap the button when ready.';
+    ? 'You can complete the morning check-in anytime.'
+    : 'The questionnaire is always available. Tap the button when ready.';
 
   if (lastEntry) {
     questionnaireStatus.textContent += ` Last check-in was on ${lastEntry.date}.`;
   }
-
-  setQuestionnaireButtonState(false);
 }
 
-function setQuestionnaireButtonState(completed) {
+function setQuestionnaireButtonState() {
   if (!questionnaireButton) return;
-  questionnaireButton.disabled = completed;
-  questionnaireButton.textContent = completed ? 'Check-in Completed' : 'Daily Morning Check-in';
-  questionnaireButton.style.opacity = completed ? '0.6' : '';
-  questionnaireButton.style.cursor = completed ? 'not-allowed' : '';
+  questionnaireButton.disabled = false;
+  questionnaireButton.textContent = 'Daily Morning Check-in';
+  questionnaireButton.style.opacity = '';
+  questionnaireButton.style.cursor = '';
 }
 
 function showQuestionnaireModal() {
-  if (hasQuestionnaireForDate(getTodayDate())) {
-    return;
-  }
-
+  if (!questionnaireModal) return;
   questionnaireModal.classList.remove('hidden');
   questionnaireModal.setAttribute('aria-hidden', 'false');
+  enableFormRowClickability();
 }
 
 function hideQuestionnaireModal() {
+  if (!questionnaireModal) return;
   questionnaireModal.classList.add('hidden');
   questionnaireModal.setAttribute('aria-hidden', 'true');
 }
 
 function promptQuestionnaireIfNeeded() {
-  const today = getTodayDate();
-  const completed = hasQuestionnaireForDate(today);
-  if (!completed) {
-    showQuestionnaireModal();
-  }
+  // Always allow the questionnaire, do not auto-open or block access.
 }
 
 function showScheduleSection() {
@@ -221,6 +272,7 @@ questionnaireForm.addEventListener('submit', event => {
     mood: formData.get('mood'),
     stress: formData.get('stress'),
     sleepQuality: formData.get('sleepQuality'),
+    confidence: formData.get('confidence'),
     notes: formData.get('questionNotes').trim(),
     createdAt: new Date().toISOString(),
   };
@@ -232,21 +284,13 @@ questionnaireForm.addEventListener('submit', event => {
   hideQuestionnaireModal();
   updateQuestionnaireStatus();
   renderQuestionnaireHistory();
+  renderStressSuggestion(questionnaireEntry.stress);
 });
 
 questionnaireButton.addEventListener('click', showQuestionnaireModal);
 openScheduleButton.addEventListener('click', showScheduleSection);
 closeScheduleButton.addEventListener('click', hideScheduleSection);
-openNewPageButton.addEventListener('click', () => {
-  if (typeof require === 'function') {
-    const {ipcRenderer} = require('electron');
-    ipcRenderer.send('open-new-page');
-  } else {
-    window.open('new-page.html', '_blank');
-  }
-});
 
-closeQuestionnaire.addEventListener('click', hideQuestionnaireModal);
 skipQuestionnaireButton.addEventListener('click', hideQuestionnaireModal);
 
 clearStorageButton.addEventListener('click', () => {
@@ -261,4 +305,5 @@ clearStorageButton.addEventListener('click', () => {
 renderEntries();
 renderQuestionnaireHistory();
 updateQuestionnaireStatus();
+renderLatestStressSuggestion();
 promptQuestionnaireIfNeeded();
