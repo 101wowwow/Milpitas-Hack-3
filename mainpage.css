@@ -86,3 +86,29 @@ body {
 .bottom-bar button + button {
   margin-left: 12px;
 }
+
+/* Small rounded square Store button positioned above the questionnaire button */
+.store-button {
+  position: absolute;
+  right: 36px; /* align slightly inset from the right edge */
+  bottom: 110px; /* sit above the bottom bar and above the questionnaire button */
+  width: 64px;
+  height: 64px;
+  border-radius: 14px;
+  background: #0b6d2b; /* dark green */
+  color: #ffffff;
+  border: none;
+  font-weight: 700;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 10px 20px rgba(11,109,43,0.22);
+  cursor: pointer;
+  z-index: 40;
+}
+
+.store-button:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 14px 28px rgba(11,109,43,0.28);
+}

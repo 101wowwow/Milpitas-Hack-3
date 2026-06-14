@@ -15,6 +15,7 @@
     <button id="bot-btn-3">Settings</button>
     <button id="bot-btn-4">Questionaire</button>
   </div>
+  <button id="store-button" class="store-button" title="Open store">store</button>
   <img src="mainJohn.png" alt="John" class="corner-avatar" />
   <script>
     document.getElementById('bot-btn-1').addEventListener('click', () => {
@@ -25,6 +26,9 @@
     });
     document.getElementById('bot-btn-4').addEventListener('click', () => {
       window.location.href = 'questionaire.html';
+    });
+    document.getElementById('store-button').addEventListener('click', () => {
+      window.location.href = 'store.html';
     });
 
     const cornerAvatar = document.querySelector('.corner-avatar');
