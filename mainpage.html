@@ -4,19 +4,23 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>mainJohn</title>
+  <link rel="stylesheet" href="fonts/inter.css" />
   <link rel="stylesheet" href="mainpage.css" />
 </head>
 <body>
   <div class="header-logo">
-    <img src="logo.png" alt="Logo" />
+    <img src="logo.png" alt="Logo" class="main-logo" />
   </div>
   <div class="bottom-bar">
     <button id="bot-btn-1">Stats</button>
     <button id="bot-btn-3">Settings</button>
     <button id="bot-btn-4">Questionaire</button>
   </div>
-  <button id="store-button" class="store-button" title="Open store">store</button>
-  <img src="mainJohn.png" alt="John" class="corner-avatar" />
+  <button id="store-button" class="store-button" title="Open store">john's closet</button>
+  <div class="corner-avatar-wrapper">
+    <img src="mainJohn.png" alt="John" class="corner-avatar" />
+    <img src="" alt="Equipped hat" class="avatar-hat hidden" id="avatar-hat" />
+  </div>
   <script>
     document.getElementById('bot-btn-1').addEventListener('click', () => {
       window.location.href = 'stats.html';
@@ -65,6 +69,26 @@
       questionnaireNavButton.style.cursor = '';
     }
 
+    function applySelectedHatToAvatar() {
+      const selectedHat = localStorage.getItem('selectedHat');
+      const avatarHat = document.getElementById('avatar-hat');
+      if (!avatarHat) return;
+      if (selectedHat && ['hat1', 'hat2', 'hat3'].includes(selectedHat)) {
+        avatarHat.src = `${selectedHat}.png`;
+        avatarHat.classList.remove('hidden');
+      } else {
+        avatarHat.classList.add('hidden');
+      }
+    }
+
+    window.addEventListener('storage', event => {
+      if (event.key === 'selectedHat') {
+        applySelectedHatToAvatar();
+      }
+    });
+
     updateQuestionnaireNav();
+    applySelectedHatToAvatar();
   </script>
 </body>
+</html>

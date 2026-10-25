@@ -2,11 +2,12 @@
 <!DOCTYPE html>
 <html>
 <head>
+  <link rel="stylesheet" href="fonts/inter.css" />
   <style>
     body {
       margin: 0;
       padding: 10px;
-      font-family: BlinkMacSystemFont, sans-serif;
+      font-family: Inter, system-ui, sans-serif;
       overflow: hidden;
       display: flex;
       flex-direction: column;
@@ -25,12 +26,26 @@
       box-shadow: 2px 2px 5px rgba(0,0,0,0.2);
       -webkit-app-region: no-drag;
     }
+    .mascot-wrapper {
+      position: relative;
+      display: inline-block;
+      animation: float 3s ease-in-out infinite;
+    }
     .mascot-image {
       width: 80px;
       height: 80px;
       cursor: pointer;
       -webkit-app-region: no-drag;
-      animation: float 3s ease-in-out infinite;
+      display: block;
+    }
+    .mascot-hat {
+      position: absolute;
+      top: -10px;
+      left: 58%;
+      transform: translateX(-50%);
+      width: 50px;
+      height: auto;
+      pointer-events: none;
     }
     .mascot-container {
       width: 100%;
@@ -40,6 +55,10 @@
       align-items: center;
       justify-content: center;
       -webkit-app-region: drag;
+    }
+
+    .hidden {
+      display: none;
     }
 
     @keyframes float {
@@ -59,7 +78,10 @@
       Time to Take a Rest!<br>You have been on your computer for 10 secs!
     </div>
 
-    <img id="mascotIcon" class="mascot-image" src="john.png" alt="John the Mascot">
+    <div class="mascot-wrapper">
+      <img id="mascotIcon" class="mascot-image" src="John.png" alt="John the Mascot">
+      <img id="mascotHat" class="mascot-hat hidden" src="" alt="John's Hat" />
+    </div>
   </div>
 
   <script>
@@ -69,6 +91,29 @@
     mascotIcon.addEventListener('click', () => {
       ipcRenderer.send('toggle-main-window');
     });
+
+    function applySelectedHatToMascot() {
+      const selectedHat = localStorage.getItem('selectedHat');
+      const mascotHat = document.getElementById('mascotHat');
+      if (!mascotHat) return;
+      if (selectedHat && ['hat1', 'hat2', 'hat3'].includes(selectedHat)) {
+        mascotHat.src = `${selectedHat}.png`;
+        mascotHat.alt = "John's Hat";
+        mascotHat.classList.remove('hidden');
+      } else {
+        mascotHat.src = '';
+        mascotHat.alt = '';
+        mascotHat.classList.add('hidden');
+      }
+    }
+
+    window.addEventListener('storage', event => {
+      if (event.key === 'selectedHat') {
+        applySelectedHatToMascot();
+      }
+    });
+
+    applySelectedHatToMascot();
 
     setTimeout(() => {
       window.close();

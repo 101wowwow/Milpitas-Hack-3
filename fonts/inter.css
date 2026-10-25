@@ -1,0 +1,17 @@
+/* Inter is bundled locally so it works offline and in the packaged app. */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url('inter-latin.woff2') format('woff2');
+}
+
+body {
+  font-family: 'Inter', system-ui, sans-serif;
+}
+
+/* Form controls don't inherit the page font by default. */
+button, input, select, textarea {
+  font-family: inherit;
+}

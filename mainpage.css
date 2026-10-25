@@ -1,6 +1,6 @@
 html, body { height: 100%; margin: 0; }
 body {
-  background: url('background.png') center/cover no-repeat;
+  background: url('Background.png') center/cover no-repeat;
   position: relative;
   font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
   -webkit-font-smoothing: antialiased;
@@ -10,7 +10,7 @@ body {
   color: #068b0f;
 }
 
-.corner-avatar {
+.corner-avatar-wrapper {
   position: absolute;
   right: 30px;
   bottom: 100px;
@@ -22,22 +22,56 @@ body {
   animation: float 3s ease-in-out infinite;
 }
 
+.corner-avatar {
+  width: 100%;
+  height: auto;
+  display: block;
+  border-radius: 12px;
+}
+
+.avatar-hat {
+    position: absolute;
+    top: 0px; /* moved up */
+    right: -6px; /* nudged slightly to the right */
+    width: 120px; /* slightly smaller */
+    max-width: 40%;
+    height: auto;
+    pointer-events: none;
+    transform: rotate(30deg);
+    transform-origin: center center;
+    z-index: 20;
+  }
 /* Logo shown in the top-left corner */
 .header-logo {
   position: absolute;
-  top: 16px;
-  left: -10px;
+  top: 12px;
+  left: 12px;
   transform: none;
-  z-index: 20;
+  z-index: 40;
   text-align: left;
+  pointer-events: none;
 }
 
 .header-logo img {
-  width: auto;
-  max-width: 360px;
-  height: auto;
-  display: block;
+    width: auto;
+    max-width: 220px;
+    height: auto;
+    display: block;
+}
 
+.logo-hat {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 140px;
+  max-width: 36%;
+  height: auto;
+  pointer-events: none;
+  display: block;
+}
+
+.hidden {
+  display: none;
 }
 
 @keyframes float {
@@ -90,12 +124,12 @@ body {
 /* Small rounded square Store button positioned above the questionnaire button */
 .store-button {
   position: absolute;
-  right: 36px; /* align slightly inset from the right edge */
-  bottom: 110px; /* sit above the bottom bar and above the questionnaire button */
+  left: 36px;
+  bottom: 110px;
   width: 64px;
   height: 64px;
   border-radius: 14px;
-  background: #0b6d2b; /* dark green */
+  background: #ffc0cb; /* light pink */
   color: #ffffff;
   border: none;
   font-weight: 700;
@@ -103,12 +137,12 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 10px 20px rgba(11,109,43,0.22);
+  box-shadow: 0 10px 20px rgba(255,192,203,0.35);
   cursor: pointer;
   z-index: 40;
 }
 
 .store-button:hover {
   transform: translateY(-3px);
-  box-shadow: 0 14px 28px rgba(11,109,43,0.28);
+  box-shadow: 0 14px 28px rgba(255,192,203,0.45);
 }

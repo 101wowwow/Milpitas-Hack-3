@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Schedule Pattern Tracker</title>
+  <link rel="stylesheet" href="fonts/inter.css" />
   <link rel="stylesheet" href="schedule.css" />
 </head>
 <body>
@@ -13,7 +14,34 @@
   <style> 
     html, body { height: 100%; margin: 0; }
     body{
-      background: url('background.png') center/cover no-repeat;
+      background: url('Background.png') center/cover no-repeat;
+    }
+    .john-avatar-wrapper {
+      position: fixed;
+      right: 1rem;
+      bottom: 1rem;
+      width: 220px;
+      max-width: 35%;
+      z-index: 20;
+    }
+    .john-avatar-wrapper .corner-avatar {
+      position: static;
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+    .john-avatar-hat {
+      position: absolute;
+      top: -18px; /* moved up */
+      left: 60%;   /* shifted slightly to the right */
+      transform: translateX(-30%); /* fine-tune horizontal centering */
+      width: 120px; /* slightly smaller */
+      height: auto;
+      pointer-events: none;
+      z-index: 25;
+    }
+    .hidden {
+      display: none;
     }
   </style>
   <div class="app-shell">
@@ -126,7 +154,10 @@
     </section>
 
     <div id="stress-suggestion" class="stress-suggestion hidden" aria-live="polite"></div>
-    <img src="john.png" alt="John" class="corner-avatar" />
+    <div class="john-avatar-wrapper">
+      <img src="John.png" alt="John" class="corner-avatar" />
+      <img src="" alt="John Hat" class="john-avatar-hat hidden" id="questionnaire-hat" />
+    </div>
   </div>
 
   <div id="questionnaire-modal" class="modal hidden" aria-hidden="true">
@@ -216,5 +247,20 @@
   </div>
 
 <script src="schedule.js"></script>
+<script>
+  function applySelectedHatToQuestionnaire() {
+    const questionnaireHat = document.getElementById('questionnaire-hat');
+    if (!questionnaireHat) return;
+    questionnaireHat.classList.add('hidden');
+  }
+
+  window.addEventListener('storage', event => {
+    if (event.key === 'selectedHat') {
+      applySelectedHatToQuestionnaire();
+    }
+  });
+
+  applySelectedHatToQuestionnaire();
+</script>
 </body>
 </html>

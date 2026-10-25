@@ -3,12 +3,7 @@ const { FuseV1Options, FuseVersion } = require('@electron/fuses');
 
 module.exports = {
   packagerConfig: {
-    // Disable ASAR during diagnosis to speed up packaging (re-enable for releases)
-    asar: false,
-    // Remove `devDependencies` from the packaged app to reduce size and speed up packaging
-    prune: true,
-    // Ignore common non-app files to avoid unnecessary copying
-    ignore: ["\\.git", "pack_test.txt", "\\.gitattributes"],
+    asar: true,
   },
   rebuildConfig: {},
   makers: [
@@ -30,6 +25,20 @@ module.exports = {
     },
   ],
   plugins: [
-    // Auto-unpack natives and FusesPlugin temporarily disabled for diagnosis.
+    {
+      name: '@electron-forge/plugin-auto-unpack-natives',
+      config: {},
+    },
+    // Fuses are used to enable/disable various Electron functionality
+    // at package time, before code signing the application
+    new FusesPlugin({
+      version: FuseVersion.V1,
+      [FuseV1Options.RunAsNode]: false,
+      [FuseV1Options.EnableCookieEncryption]: true,
+      [FuseV1Options.EnableNodeOptionsEnvironmentVariable]: false,
+      [FuseV1Options.EnableNodeCliInspectArguments]: false,
+      [FuseV1Options.EnableEmbeddedAsarIntegrityValidation]: true,
+      [FuseV1Options.OnlyLoadAppFromAsar]: true,
+    }),
   ],
 };
