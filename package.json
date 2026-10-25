@@ -26,5 +26,8 @@
   },
   "dependencies": {
     "electron-squirrel-startup": "^1.0.1"
+  },
+  "overrides": {
+    "extract-zip": "npm:@electron-internal/extract-zip@1.0.3"
   }
 }
